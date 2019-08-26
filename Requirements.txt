@@ -1,0 +1,17 @@
+pip install:
+
+pyfiglet
+opencv-python
+shutil
+pynput
+pyautogui
+numpy
+PyAudio
+wave
+pywin32
+ntlm-auth
+SoundCard==0.1.1
+pyinstaller
+subprocess32
+psutil
+ffmpeg
