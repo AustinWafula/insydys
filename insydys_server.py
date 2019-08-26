@@ -143,7 +143,7 @@ def audcap():
                               print("releasing speakers")
                                
                 except:
-                       print('error:could not play video footage!')
+                       print('error:could not play  audio!')
              else:
                 conn.send(response.encode())
                 print("Erasing audio recording on client machine...")
