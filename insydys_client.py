@@ -144,7 +144,7 @@ def audcap():
             seconds = capture_time
             filename = "audrec.wav"
 
-            p = pyaudio.PyAudio()  o
+            p = pyaudio.PyAudio()  
 
             print('Recording')
 
