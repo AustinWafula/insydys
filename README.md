@@ -1,6 +1,6 @@
 # insydys
-A Python Reverse shell program  with other
-added capabilities like:-
+A Python program that encompasses a reverse shell with other
+capabilities like:-
 retrieving screenshots,
 retrieving audio recordings from  microphones connected to the computer and  webcam video recordings from webcam, 
 uploading and retrieving files and folders,
