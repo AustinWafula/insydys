@@ -600,7 +600,7 @@ def main():
       server()
    else:
       print("No selection made exiting")
-      sys.exit
+      sys.exit()
 if __name__=="__main__":
        main()           
         
