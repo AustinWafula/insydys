@@ -48,7 +48,7 @@ def vidcap():
                 print("video footage received saved at"+os.getcwd()+"as:vidrec.avi")
                 playvid=input('Do u wish to play the video now(y/n): ')
                 try:
-                     if playvid[:1]=='y'
+                     if playvid[:1]=='y':
                             cap = cv2.VideoCapture('vidrec.avi') 
                                
                           
