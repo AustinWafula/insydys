@@ -1,4 +1,4 @@
-pip install:
+#pip install:
 
 pyfiglet
 opencv-python
@@ -12,6 +12,7 @@ pywin32
 ntlm-auth
 SoundCard==0.1.1
 pyinstaller
+SoundFile
 subprocess32
 psutil
 ffmpeg
