@@ -318,21 +318,21 @@ def windows_compiler():
    global host
    global ports
    global windows_file
-   file = open("insydyscli.py", "r")
+   file = open("insydys_client.py", "r")
    text = file.read()
    file.close()
-   file = open("insydyscli.py", "w")
+   file = open("insydys_client.py", "w")
    file.write(text.replace('0.0.0.0',host))
    file.close()
-   file = open("insydyscli.py", "r")
+   file = open("insydys_client.py", "r")
    text = file.read()
    file.close()
-   file = open("insydyscli.py", "w")
+   file = open("insydys_client.py", "w")
    file.write(text.replace('0000',ports))
    file.close()
    file_path=input("Enter path for output file:")
    print("Generating exe please wait...")
-   cc="wine pyinstaller.exe --clean --onefile --noconsole insydyscli.py --distpath "+file_path+" --name "
+   cc="wine pyinstaller.exe --clean --onefile --noconsole insydys_client.py --distpath "+file_path+" --name "
    sh=sp.Popen(cc+windows_file,shell=True,
                               stdout=sp.PIPE,
                               stderr=sp.PIPE,
@@ -340,16 +340,16 @@ def windows_compiler():
 
 
    print("file generated saved at",os.getcwd(),"/dist/",windows_file)
-   file = open("insydyscli.py", "r")
+   file = open("insydys_client.py", "r")
    text = file.read()
    file.close()
-   file = open("insydyscli.py", "w")
+   file = open("insydys_client.py", "w")
    file.write(text.replace(host,'0.0.0.0'))
    file.close()
-   file = open("insydyscli.py", "r")
+   file = open("insydys_client.py", "r")
    text = file.read()
    file.close()
-   file = open("insydyscli.py", "w")
+   file = open("insydys_client.py", "w")
    file.write(text.replace(ports,'0000'))
    file.close()
    
@@ -357,31 +357,31 @@ def linux_compiler():
    global linux_file
    global host
    global ports
-   file = open("insydercli.py", "r")
+   file = open("insydys_client.py", "r")
    text = file.read()
    file.close()
-   file = open("insydercli.py", "w")
+   file = open("insydys_client.py", "w")
    file.write(text.replace('0.0.0.0',host))
    file.close()
-   file = open("insydercli.py", "r")
+   file = open("insydys_client.py", "r")
    text = file.read()
    file.close()
-   file = open("insydercli.py", "w")
+   file = open("insydys_client.py", "w")
    file.write(text.replace('0000',ports))
    file.close()
    file_path2=input("Enter path for output file:")
    print("Generating exe please wait...")
-   subprocess.call(["pyinstaller","--onefile","--clean","--noconsole","insydercli.py","--distpath",file_path2,"--name",linux_file])
+   subprocess.call(["pyinstaller","--onefile","--clean","--noconsole","insydys_client.py","--distpath",file_path2,"--name",linux_file])
    print("file generated saved at",file_path2)
-   file = open("insydercli.py", "r")
+   file = open("insydys_client.py", "r")
    text = file.read()
    file.close()
-   file = open("insydercli.py", "w")
+   file = open("insydys_client.py", "w")
    file.write(text.replace(host,'0.0.0.0.'))
-   file = open("insydercli.py", "r")
+   file = open("insydys_client.py", "r")
    text = file.read()
    file.close()
-   file = open("insydercli.py", "w")
+   file = open("insydys_client.py", "w")
    file.write(text.replace(ports,'0000'))
    file.close()
 def upload():
