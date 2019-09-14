@@ -1,6 +1,5 @@
 python3
-wine
-#pip install:
+
 pyfiglet,
 opencv-python,
 shutil,
@@ -17,3 +16,5 @@ SoundFile,
 subprocess32,
 psutil,
 ffmpeg,
+pyAesCrypt
+
