@@ -395,8 +395,8 @@ def upload():
 def main():
     global s
     s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    host="10.42.0.1"
-    port=740
+    host="0.0.0.0"
+    port=0000
     s.connect((host,port))
     while 1:
         while True:
