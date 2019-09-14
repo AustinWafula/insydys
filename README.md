@@ -1,5 +1,5 @@
 # insydys
-insydys is an easy to use python based exploitation set that extends capabities which are included in frameworks such as Metasploit 
+insydys is an easy to use python based exploitation set that extends some capabities which are included in frameworks such as Metasploit 
 
 **Features**
 
