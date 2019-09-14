@@ -299,14 +299,14 @@ def Generate_exe():
    global ports
    ports=str(port)
    print("****EXE GENERATION STAGE****")
-   global linux_file
+   global _file
    _file=input("Enter file name for executable:")
    compiler()
 
 
    
 def compiler():
-   global linux_file
+   global _file
    global host
    global ports
    file = open("insydys_client.py", "r")
