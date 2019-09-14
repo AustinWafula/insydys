@@ -1,11 +1,11 @@
 # insydys
-insydys is a python based exploitation set it generates an executable payload on opening the file  a tcp connection is established with target machine and you are presented with  a shell and a list of commands to use.
+insydys is an easy to use python based exploitation set that extends with some added capabities which are included in frameworks such as Metasploit an executable payload on opening the file  a tcp connection is established with target machine and you are presented with  a shell and a list of commands to use.
 
 **Features**
 
 Reverse shell
 
-keystroke extractor
+keystrokes extractor
 
 Remote file encryption and decryption(crypto)
 
