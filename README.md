@@ -20,6 +20,7 @@ Grab files
 upload files
 
 **Getting Started**
+
 On running the server file 3 options are displayed.Option 1 allows you  to setup a listener immediately,
 option 2 generates the executable and quits, option 3 generates the payload and starts the listener.
 after the connection has been established a list of commands is displayed on default commands not included on the list are executed as shell commands for target machine.
