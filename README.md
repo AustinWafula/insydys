@@ -1,16 +1,18 @@
 # insydys
-insydys is an easy to use python based exploitation tool that extends some capabities which are included in frameworks such as Metasploit 
+insydys is an easy to use python based exploitation tool that extends some capabilities which are included in frameworks such as Metasploit 
 
 **Features**
 
 Reverse shell
 
-keystrokes extractor
+keylogger
 
 Remote file encryption and decryption(crypto)
 
 Screenshot extractor
+ folders chosen
 
+decrypt-decryption of the AES encrypted files
 Remote webcam access
 
 Remote microphone access
